@@ -17,12 +17,8 @@ bairro_info = pd.read_csv(f'Base de dados/dados_bairros.csv', sep=',')
 bairro_info.Bairros	= bairro_info.Bairros.str.upper()
 bairro_info = bairro_info.set_index('Bairros')
 
-base = datetime.date.today()
-date_list = [base - datetime.timedelta(days=x) for x in range(1,61)]
-date_list = pd.to_datetime(date_list, errors = 'coerce')
-
 ########################################################################################################
-st.sidebar.title(date_list[0])
+st.sidebar.title(dateList[0])
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise por bairro', 'Analise por IDH'])
 
