@@ -28,8 +28,6 @@ dataAnalise = pd.to_datetime(dataAnalise, errors = 'coerce')
 
 dateList = pd.date_range(dataAnalise[0], dataAnalise[1])
 
-st.sidebar.title(dateList[0])
-
 filtroDt = (data.dataCaso >= dataAnalise[0]) & (data.dataCaso <= dataAnalise[1])
 df = data[filtroDt]
 filtroDt = (data2.dataCaso >= dataAnalise[0]) & (data2.dataCaso <= dataAnalise[1])
