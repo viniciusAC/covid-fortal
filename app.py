@@ -18,7 +18,6 @@ bairro_info.Bairros	= bairro_info.Bairros.str.upper()
 bairro_info = bairro_info.set_index('Bairros')
 
 ########################################################################################################
-st.sidebar.title(dateList[0])
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise por bairro', 'Analise por IDH'])
 
@@ -28,6 +27,8 @@ dataAnalise[1] = st.sidebar.date_input('Data de termino', dataAnalise[1], dataAn
 dataAnalise = pd.to_datetime(dataAnalise, errors = 'coerce')
 
 dateList = pd.date_range(dataAnalise[0], dataAnalise[1])
+
+st.sidebar.title(dateList[0])
 
 filtroDt = (data.dataCaso >= dataAnalise[0]) & (data.dataCaso <= dataAnalise[1])
 df = data[filtroDt]
