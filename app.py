@@ -22,7 +22,7 @@ date_list = [base - datetime.timedelta(days=x) for x in range(1,61)]
 date_list = pd.to_datetime(date_list, errors = 'coerce')
 
 ########################################################################################################
-
+st.sidebar.title(date_list[0])
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise por bairro', 'Analise por IDH'])
 
