@@ -15,11 +15,8 @@ def grafico_temporal(dfAtual, date_list):
         obtosPorDia.append(dfTempData[dfTempData.obitoConfirmado == 'Verdadeiro'].shape[0])
 
     GrafDiaInfo = np.array([date_list, infectadosPorDia, suspeitosPorDia])
+    st.write(GrafDiaInfo)
     dfGrafDia = pd.DataFrame(GrafDiaInfo.T, columns=["data", "casos confirmados", "casos suspeitos"])
-
-    st.dataframe(dfGrafDia.head())
-    st.write(dfGrafDia.dtypes)
-
     dfGrafDia = dfGrafDia.set_index('data')
 
     GrafObitosDiaInfo = np.array([date_list, obtosPorDia])
