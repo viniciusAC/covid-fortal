@@ -16,6 +16,7 @@ def grafico_temporal(dfAtual, date_list):
 
     GrafDiaInfo = np.array([date_list, infectadosPorDia, suspeitosPorDia])
     st.write(GrafDiaInfo)
+    st.write(date_list)
     dfGrafDia = pd.DataFrame(GrafDiaInfo.T, columns=["data", "casos confirmados", "casos suspeitos"])
     dfGrafDia = dfGrafDia.set_index('data')
 
