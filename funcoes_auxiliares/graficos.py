@@ -14,7 +14,7 @@ def grafico_temporal(dfAtual, date_list):
         suspeitosPorDia.append(-dfTempData[dfTempData.resultadoFinalExame == 'Suspeito'].shape[0])
         obtosPorDia.append(dfTempData[dfTempData.obitoConfirmado == 'Verdadeiro'].shape[0])
 
-    GrafDiaInfo = {'data': date_list, 'casos confirmados': infectadosPorDia, 'casos suspeitos'= suspeitosPorDia}
+    GrafDiaInfo = {'data': date_list, 'casos confirmados': infectadosPorDia, 'casos suspeitos': suspeitosPorDia}
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
     dfGrafDia = dfGrafDia.set_index('data')
 
