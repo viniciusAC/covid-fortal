@@ -21,7 +21,7 @@ bairro_info = bairro_info.set_index('Bairros')
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise por bairro', 'Analise por IDH'])
 
-dataAnalise = [datetime.datetime(2020, 1, 1), datetime.date.today()]
+dataAnalise = [datetime.datetime(2021, 3, 1), datetime.date.today()]
 dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), datetime.date.today())
 dataAnalise[1] = st.sidebar.date_input('Data de termino', dataAnalise[1], dataAnalise[0], datetime.date.today())
 dataAnalise = pd.to_datetime(dataAnalise, errors = 'coerce')
