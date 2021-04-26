@@ -18,8 +18,8 @@ def grafico_temporal(dfAtual, date_list):
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
     dfGrafDia = dfGrafDia.set_index('data')
 
-    GrafObitosDiaInfo = np.array([date_list, obtosPorDia])
-    dfObitoGrafDia = pd.DataFrame(GrafObitosDiaInfo.T, columns=["data", "obitos"])
+    GrafObitosDiaInfo = {'data': date_list, 'obitos': obtosPorDia}
+    dfObitoGrafDia = pd.DataFrame(GrafObitosDiaInfo)
     dfObitoGrafDia = dfObitoGrafDia.set_index('data')
 
     st.markdown('### Mostragem dos casos')
