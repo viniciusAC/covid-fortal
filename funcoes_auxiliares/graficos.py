@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import datetime
+import altair as alt
 
 def grafico_temporal(dfAtual, date_list):
     infectadosPorDia = []
@@ -43,6 +44,22 @@ def bairro_table(dfAtual):
     st.markdown('### Dados dos bairros')
     st.dataframe(dfGrafBairro)
 
+def bairro_idh_table(dfAtual, bairro_info):
+    dados = []
+    for i in dfAtual.bairroCaso.value_counts().index:
+        filtroBairro = dfAtual.bairroCaso == i
+        dfTemp = dfAtual[filtroBairro]
+        dados.append([bairro_info.loc[i][0], i, 
+                    dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0],
+                    dfTemp[dfTemp.resultadoFinalExame == 'Suspeito'].shape[0],
+                    dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
+    
+    dfGrafBairro = pd.DataFrame(dados, columns=["IDH", "bairro", "casos confirmados", "casos suspeitos", "obitos"])
+    dfGrafBairro.sort_values(by=['IDH'], inplace=True, ascending=False, ignore_index=True)
+
+    st.markdown('### Dados dos bairros')
+    st.dataframe(dfGrafBairro)
+
 def graficos_idade(dfAtual):
     dadosPositivos = []
     dadosObito = []
@@ -80,6 +97,26 @@ def info_basicas(dfAtual):
     confirmados = dfAtual[dfAtual.resultadoFinalExame == 'Positivo'].shape[0]
     obitos = dfAtual[dfAtual.obitoConfirmado == 'Verdadeiro'].shape[0]
     infos = [[dfAtual.shape[0], confirmados, obitos, (obitos/confirmados)*100], [dfAtual.shape[0], confirmados, obitos, (obitos/confirmados)*100], [dfAtual.shape[0], confirmados, obitos, (obitos/confirmados)*100], [dfAtual.shape[0], confirmados, obitos, (obitos/confirmados)*100]]
-    dfInfo = pd.DataFrame(infos, columns=["Casos noticados", "Casos confirmados", "Obitos", "Letalidade"])
+    dfInfo = pd.DataFrame(infos, columns=["Casos notificados", "Casos confirmados", "Obitos", "Letalidade"])
 
     st.table(dfInfo.head(1))
+
+def idhXobitos(dfAtual, bairro_info):
+    dados = []
+    for i in dfAtual.bairroCaso.value_counts().index:
+        filtroBairro = dfAtual.bairroCaso == i
+        dfTemp = dfAtual[filtroBairro]
+        dados.append([bairro_info.loc[i][0], 
+                    dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
+    
+    dfIdhObito = pd.DataFrame(dados, columns=["IDH", "obitos"])
+
+    st.markdown('### IDH X Obitos')
+    st.vega_lite_chart(dfIdhObito, {
+        "height": 300,
+        'mark': {'type': 'circle', 'tooltip': True},
+        'encoding': {
+            'x': {'field': 'IDH', 'type': 'quantitative'},
+            'y': {'field': 'obitos', 'type': 'quantitative'}
+        },
+    }, use_container_width = True)

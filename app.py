@@ -38,6 +38,7 @@ if pagina_atual == 'Analise geral':
     info_basicas(df2)
     grafico_temporal(df2, dateList)
     graficos_idade(df2)
+    
 elif pagina_atual == 'Analise por bairro':
     st.markdown('# Analise por bairro')
     
@@ -57,7 +58,7 @@ elif pagina_atual == 'Analise por bairro':
 
 elif pagina_atual == 'Analise por IDH':
     st.markdown('# Analise por IDH')
-    values = st.slider('Selecione o intervalo do IDH', 0.0, 1.0, (0.100, 0.960))
+    values = st.slider('Selecione o intervalo do IDH', 0.0, 1.0, (0.0, 1.0))
 
     filtroIdhMin = bairro_info['IDH em 2010[8]'] >= values[0]
     df_bairrosIdhInfo = bairro_info[filtroIdhMin]
@@ -69,5 +70,6 @@ elif pagina_atual == 'Analise por IDH':
 
     info_basicas(df_bairrosIdh)
     grafico_temporal(df_bairrosIdh, dateList)
-    bairro_table(df_bairrosIdh)
+    bairro_idh_table(df_bairrosIdh, bairro_info)
+    idhXobitos(df_bairrosIdh, bairro_info)
     graficos_idade(df_bairrosIdh)
