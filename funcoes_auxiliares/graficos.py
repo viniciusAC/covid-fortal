@@ -4,18 +4,19 @@ import pandas as pd
 import datetime
 import altair as alt
 
-def grafico_temporal(dfAtual, date_list):
+def grafico_temporal(dfAtual):
     infectadosPorDia = []
     suspeitosPorDia = []
     obtosPorDia = []
-    for i in date_list:
-        filtroDia = dfAtual.dataCaso == i
-        dfTempData = dfAtual[filtroDia]
-        infectadosPorDia.append(dfTempData[dfTempData.resultadoFinalExame == 'Positivo'].shape[0])
-        suspeitosPorDia.append(-dfTempData[dfTempData.resultadoFinalExame == 'Suspeito'].shape[0])
-        obtosPorDia.append(dfTempData[dfTempData.obitoConfirmado == 'Verdadeiro'].shape[0])
+    date_list = []
+    grouped = dfAtual.groupby(['dataCaso'])
+    for name, group in grouped:
+        date_list.append(name)
+        infectadosPorDia.append(group[group.resultadoFinalExame == 'Positivo'].shape[0])
+        suspeitosPorDia.append(-group[group.resultadoFinalExame == 'Caso suspeito'].shape[0])
+        obtosPorDia.append(group[group.obitoConfirmado == 'Verdadeiro'].shape[0])
 
-    GrafDiaInfo = {'data': date_list, 'casos confirmados': infectadosPorDia, 'casos suspeitos': suspeitosPorDia}
+    GrafDiaInfo = {'data': date_list, 'casos confirmados': infectadosPorDia, 'casos caso suspeito': suspeitosPorDia}
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
     dfGrafDia = dfGrafDia.set_index('data')
 
@@ -36,7 +37,7 @@ def bairro_table(dfAtual):
         dfTemp = dfAtual[filtroBairro]
         dados.append([i, 
                     dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0],
-                    dfTemp[dfTemp.resultadoFinalExame == 'Suspeito'].shape[0],
+                    dfTemp[dfTemp.resultadoFinalExame == 'Caso suspeito'].shape[0],
                     dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
     
     dfGrafBairro = pd.DataFrame(dados, columns=["Bairro", "casos confirmados", "casos suspeitos", "obitos"])
@@ -51,7 +52,7 @@ def bairro_idh_table(dfAtual, bairro_info):
         dfTemp = dfAtual[filtroBairro]
         dados.append([bairro_info.loc[i][0], i, 
                     dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0],
-                    dfTemp[dfTemp.resultadoFinalExame == 'Suspeito'].shape[0],
+                    dfTemp[dfTemp.resultadoFinalExame == 'Caso suspeito'].shape[0],
                     dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
     
     dfGrafBairro = pd.DataFrame(dados, columns=["IDH", "bairro", "casos confirmados", "casos suspeitos", "obitos"])
@@ -120,3 +121,50 @@ def idhXobitos(dfAtual, bairro_info):
             'y': {'field': 'obitos', 'type': 'quantitative'}
         },
     }, use_container_width = True)
+
+def vacinas_dias(dfAtual):
+    dose1 = []
+    dose2 = []
+    date_list = []
+    grouped = dfAtual.groupby(['data_vacinação'])
+    for name, group in grouped:
+        date_list.append(name)
+        dose1.append(group[group.dose == 'DOSE 1'].shape[0])
+        dose2.append(-group[group.dose == 'DOSE 2'].shape[0])
+
+    GrafDiaInfo = {'data': date_list, 'Primeira dose': dose1, 'Segunda dose': dose2}
+    dfGrafDia = pd.DataFrame(GrafDiaInfo)
+    dfGrafDia = dfGrafDia.set_index('data')
+
+    st.markdown('### Mostragem dos vacinados')
+    st.bar_chart(dfGrafDia)
+
+    dose1 = np.cumsum(dose1)
+    dose2 = [x * -1 for x in dose2]
+    dose2 = np.cumsum(dose2)
+
+    GrafDiaInfo = {'data': date_list, 'Primeira dose': dose1, 'Segunda dose': dose2}
+    dfGrafDia = pd.DataFrame(GrafDiaInfo)
+    dfGrafDia = dfGrafDia.set_index('data')
+
+    st.markdown('### Mostragem acumulativa dos vacinados')
+    st.line_chart(dfGrafDia)
+
+def vacinacao_grupo(dfAtual):
+    grupo = []
+    nGrupo1 = []
+    nGrupo2 = []
+    for i in dfAtual.grupo_prioritario.value_counts().index:
+        filtroGrupo = dfAtual.grupo_prioritario == i
+        dfTemp = dfAtual[filtroGrupo]
+
+        grupo.append(i)
+        nGrupo1.append(dfTemp[dfTemp.dose == 'DOSE 1'].shape[0])
+        nGrupo2.append(-dfTemp[dfTemp.dose == 'DOSE 2'].shape[0])
+    
+    GrafGrupo = {'Grupos prioritarios': grupo, 'Primeira dose': nGrupo1, 'Segunda dose': nGrupo2}
+    dfGrafGrupo = pd.DataFrame(GrafGrupo)
+    dfGrafGrupo = dfGrafGrupo.set_index('Grupos prioritarios')
+
+    st.markdown('### Grupos prioritarios que ja foram vacinados')
+    st.bar_chart(dfGrafGrupo)
