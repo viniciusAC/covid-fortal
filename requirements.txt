@@ -1,9 +1,5 @@
-streamlit
-numpy
-pandas
-datetime
-os
-sys
-selenium
-Levenshtein
-time
+streamlit==0.80.0
+numpy==1.18.5
+pandas==1.0.5
+datetime==4.3
+selenium==3.141.0
