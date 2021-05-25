@@ -76,6 +76,7 @@ elif pagina_atual == 'Analise por IDH':
     grafico_temporal(df_bairrosIdh)
     bairro_idh_table(df_bairrosIdh, bairro_info)
     idhXobitos(df_bairrosIdh, bairro_info)
+    idhXconfirmdo(df_bairrosIdh, bairro_info)
     graficos_idade(df_bairrosIdh)
 
 elif pagina_atual == 'Vacinação':
