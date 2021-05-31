@@ -147,7 +147,6 @@ def vac_fase():
         'SÍNDROME DE DOWN': 'Fase 3',
         'INDIVÍDUOS TRANSPLANTADOS DE ÓRGÃO SÓLIDO': 'Fase 3',
         'ANEMIA FALCIFORME': 'Fase 3',
-        'OUTROS': 'Fase 4',
         'RECEPCIONISTA': 'Fase 4',
         'POPULAÇÃO GERAL': 'Fase 4',
         'ASSISTENTE SOCIAL': 'Fase 4',
@@ -179,7 +178,8 @@ def vac_fase():
         'FUNCIONÁRIO DO SIST. FUNERÁRIO': 'Fase 4',
         'CAMINHONEIRO': 'Fase 4',
         'EXÉRCITO': 'Fase 4',
-        'FORÇA AÉREA': 'Fase 4'
+        'FORÇA AÉREA': 'Fase 4',
+        'OUTROS': 'Outro'
     }
 
     vacinados = pd.read_csv('Base de dados/vacinados.csv', sep=';')

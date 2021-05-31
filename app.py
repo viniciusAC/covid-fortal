@@ -11,7 +11,7 @@ data['dataCaso'] = pd.to_datetime(data['dataCaso'])
 data['dataCaso'] = data['dataCaso'].dt.date
 
 # data.sort_values(by=['resultadoFinalExame'], inplace=True)  
-# data.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True) #CUIDA AQUIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+# data.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True)
 # data = data.drop(columns=['identificadorCaso'])
 
 bairro_info = pd.read_csv(f'Base de dados/dados_bairros.csv', sep=',')

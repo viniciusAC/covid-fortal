@@ -11,6 +11,7 @@ def delete_wrong_dates(df_atual):
     df_atual.idadeCaso = df_atual.idadeCaso.replace(range(101,1001), float("nan"))
     df_atual.loc[df_atual['idadeCaso'] == float("nan"), 'faixaEtaria'] = 'Sem Informacao'
     df_atual.faixaEtaria = df_atual.faixaEtaria.fillna('Sem Informacao')
+    df_atual = df_atual.drop(columns=['idadeCaso'])
     dates = ['dataResultadoExame', 'dataInicioSintomas', 'dataColetaExame']
     optimize2(df_atual, dates)
     return df_atual
@@ -18,39 +19,21 @@ def delete_wrong_dates(df_atual):
 
 def remove_columns(df_atual):
     print('Removendo colunas desnecessarias')
-    columns_atuais = df_atual.columns.to_list()
-    columns = ['codigoPaciente', 'municipioPaciente', 'bairroPaciente', 'sexoPaciente', 'dataResultadoExame', 'resultadoFinalExame',
-            'dataInicioSintomas', 'dataColetaExame', 'racaCorPaciente', 'obitoConfirmado', 'idadePaciente']
-
-    for i in columns_atuais:
-        if i not in columns:
-            df_atual = df_atual.drop([i], axis=1)
-    return df_atual
-
-
-def create_faixaEtaria(df_atual):
-    print('Criando coluna de faixa etaria')
-    df_atual.idadeCaso = pd.to_numeric(df_atual.idadeCaso)
-
-    df_atual.loc[(df_atual.idadeCaso >= 0) & (df_atual.idadeCaso <= 4), 'faixaEtaria'] = '00 a 04 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 5) & (df_atual.idadeCaso <= 9), 'faixaEtaria'] = '05 a 09 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 10) & (df_atual.idadeCaso <= 14), 'faixaEtaria'] = '10 a 14 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 15) & (df_atual.idadeCaso <= 19), 'faixaEtaria'] = '15 a 19 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 20) & (df_atual.idadeCaso <= 24), 'faixaEtaria'] = '20 a 24 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 25) & (df_atual.idadeCaso <= 29), 'faixaEtaria'] = '25 a 29 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 30) & (df_atual.idadeCaso <= 34), 'faixaEtaria'] = '30 a 34 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 35) & (df_atual.idadeCaso <= 39), 'faixaEtaria'] = '35 a 39 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 40) & (df_atual.idadeCaso <= 44), 'faixaEtaria'] = '40 a 44 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 45) & (df_atual.idadeCaso <= 49), 'faixaEtaria'] = '45 a 49 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 50) & (df_atual.idadeCaso <= 54), 'faixaEtaria'] = '50 a 54 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 55) & (df_atual.idadeCaso <= 59), 'faixaEtaria'] = '55 a 59 anos' 
-    df_atual.loc[(df_atual.idadeCaso >= 60) & (df_atual.idadeCaso <= 64), 'faixaEtaria'] = '60 a 64 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 65) & (df_atual.idadeCaso <= 69), 'faixaEtaria'] = '65 a 69 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 70) & (df_atual.idadeCaso <= 74), 'faixaEtaria'] = '70 a 74 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 75) & (df_atual.idadeCaso <= 79), 'faixaEtaria'] = '75 a 79 anos'
-    df_atual.loc[(df_atual.idadeCaso >= 80), 'faixaEtaria'] = '80 ou mais'
-    df_atual.faixaEtaria.fillna('Sem Informacao', inplace=True)
-
+    df_atual = df_atual.drop(columns=['rownum', 'idRedcap', 'classificacaoEstadoRedcap', 'idEsus', 'idSivep',
+                                'bairroCasoGeocoder', 'tipoObitoMaterno', 'codigoMunicipioCaso', 
+                                'comorbidadeHiv', 'comorbidadeNeoplasias', 'paisCaso', 'estadoCaso',
+                                'dataNascimento', 'requisicaoGal', 'laboratorioExame', 'cnesNotificacaoEsus',
+                                'municipioNotificacaoEsus', 'localObito', 'comorbidadePuerperaSivep',
+                                'comorbidadeHematologiaSivep', 'comorbidadeSindromeDownSivep',
+                                'comorbidadeHepaticaSivep', 'comorbidadeNeurologiaSivep',
+                                'comorbidadeImunodeficienciaSivep','comorbidadeRenalSivep', 
+                                'comorbidadeObesidadeSivep', 'cboEsus', 'gestante', 'classificacaoEstadoEsus', 
+                                'classificacaoFinalEsus', 'tipoTesteEsus', 'tipoLocalObito', 'classificacaoObito',
+                                'evolucaoCasoEsus', 'profissionalSaudeEsus', 'evolucaoCasoSivep', 'tipoTesteExame',
+                                'comorbidadeCardiovascularSivep',  'comorbidadeAsmaSivep', 'comorbidadeDiabetesSivep', 
+                                'comorbidadePneumopatiaSivep', 'classificacaoEstadoSivep', 'dataNotificacao', 'dataSolicitacaoExame',
+                                'dataInternacaoSivep', 'dataEntradaUTISivep', 'dataSaidaUTISivep', 'dataEvolucaoCasoSivep',
+                                'dataNotificacaoObito', 'classificacaoFinalCasoSivep'])
     return df_atual
 
 
@@ -219,12 +202,6 @@ def calculate_infection(df_atual, bairro_info):
 
 def processing_new_rows(df_atual):
     df_atual = remove_columns(df_atual)
-
-    df_atual.rename(columns={"codigoPaciente": "identificadorCaso", "municipioPaciente": "municipioCaso",
-                            "bairroPaciente": "bairroCaso",  "sexoPaciente": "sexoCaso", "racaCorPaciente": "racaCor", 
-                            "obitoConfirmado": "obitoConfirmado", "idadePaciente": "idadeCaso"}, inplace=True)
-    
-    df_atual = create_faixaEtaria(df_atual)
     df_atual = delete_wrong_dates(df_atual)
     df_atual = filter_muni(df_atual)
     df_atual = date_correction(df_atual)
@@ -236,18 +213,13 @@ def processing_new_rows(df_atual):
 
     df_atual = correction_bairro(df_atual, bairro_info)
 
-    return df_atual
+    df_atual.sort_values(by=['resultadoFinalExame'], inplace=True)  
+    df_atual.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True)
+    df_atual = df_atual.drop(columns=['identificadorCaso'])
 
-def add_rows(df_atual):
-    data = pd.read_csv('Base de dados/dados_limpos.csv', sep=';')
-    data = data.drop(['Unnamed: 0'], axis=1)
-    data['dataCaso'] = pd.to_datetime(data['dataCaso'])
-    data['dataCaso'] = data['dataCaso'].dt.date
 
-    data = data.append(df_atual, ignore_index=True)
-    data.drop_duplicates(keep=False,inplace=True,ignore_index=True)
-
-    data.to_csv('Base de dados/dados_limpos.csv', sep=';')
+    df_atual.to_csv('Base de dados/dados_limpos.csv', sep=';')
+    
 
     
 
