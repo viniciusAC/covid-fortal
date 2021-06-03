@@ -27,7 +27,7 @@ vacinados['data_vacinação'] = vacinados['data_vacinação'].dt.date
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise por bairro', 'Analise por IDH', 'Vacinação'])
 
-dataAnalise = [datetime.datetime(2021, 3, 1), datetime.date.today()]
+dataAnalise = [datetime.datetime(2020, 1, 1), datetime.date.today()]
 dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), datetime.date.today())
 dataAnalise[1] = st.sidebar.date_input('Data de termino', dataAnalise[1], dataAnalise[0], datetime.date.today())
 dataAnalise = pd.to_datetime(dataAnalise, errors = 'coerce')
@@ -42,6 +42,7 @@ if pagina_atual == 'Analise geral':
     info_basicas(df1)
     grafico_temporal(df1)
     graficos_idade(df1)
+    mapa(df1, bairro_info)
     
 elif pagina_atual == 'Analise por bairro':
     st.markdown('# Analise por bairro')
@@ -75,8 +76,7 @@ elif pagina_atual == 'Analise por IDH':
     info_basicas(df_bairrosIdh)
     grafico_temporal(df_bairrosIdh)
     bairro_idh_table(df_bairrosIdh, bairro_info)
-    idhXobitos(df_bairrosIdh, bairro_info)
-    idhXconfirmdo(df_bairrosIdh, bairro_info)
+    idhXgraph(df_bairrosIdh, bairro_info)
     graficos_idade(df_bairrosIdh)
 
 elif pagina_atual == 'Vacinação':

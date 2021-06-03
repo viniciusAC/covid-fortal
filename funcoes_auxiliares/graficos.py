@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import datetime
+import pydeck as pdk
+from pydeck.types import String
 
 
 def grafico_temporal(dfAtual):
@@ -108,15 +110,18 @@ def info_basicas(dfAtual):
     st.table(dfInfo.head(1))
 
 
-def idhXobitos(dfAtual, bairro_info):
-    dados = []
+def idhXgraph(dfAtual, bairro_info):
+    dadosObito = []
+    dadosConfirmado = []
     for i in dfAtual.bairroCaso.value_counts().index:
         filtroBairro = dfAtual.bairroCaso == i
         dfTemp = dfAtual[filtroBairro]
-        dados.append([bairro_info.loc[i][0], 
+        dadosObito.append([bairro_info.loc[i][0], 
                     dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
+        dadosConfirmado.append([bairro_info.loc[i][0], 
+                    dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]])
     
-    dfIdhObito = pd.DataFrame(dados, columns=["IDH", "obitos"])
+    dfIdhObito = pd.DataFrame(dadosObito, columns=["IDH", "Obitos"])
 
     st.markdown('### IDH X Obitos')
     st.vega_lite_chart(dfIdhObito, {
@@ -128,19 +133,10 @@ def idhXobitos(dfAtual, bairro_info):
         },
     }, use_container_width = True)
 
-
-def idhXconfirmdo(dfAtual, bairro_info):
-    dados = []
-    for i in dfAtual.bairroCaso.value_counts().index:
-        filtroBairro = dfAtual.bairroCaso == i
-        dfTemp = dfAtual[filtroBairro]
-        dados.append([bairro_info.loc[i][0], 
-                    dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]])
-    
-    dfIdhObito = pd.DataFrame(dados, columns=["IDH", "Casos positivos"])
+    dfIdhConfirmado = pd.DataFrame(dados, columns=["IDH", "Casos positivos"])
 
     st.markdown('### IDH X Casos positivos')
-    st.vega_lite_chart(dfIdhObito, {
+    st.vega_lite_chart(dfIdhConfirmado, {
         "height": 300,
         'mark': {'type': 'circle', 'tooltip': True},
         'encoding': {
@@ -227,3 +223,41 @@ def vacinacao_grupo(dfAtual):
     tabFases = pd.DataFrame(tabFases)
 
     st.table(tabFases)
+
+def mapa(dfAtual, bairro_info):
+    dadosObito = []
+    dadosConfirmado = []
+    for i in dfAtual.bairroCaso.value_counts().index:
+        if i == 'Indeterminado':
+            continue
+        filtroBairro = dfAtual.bairroCaso == i
+        dfTemp = dfAtual[filtroBairro]
+        dadosObito.append([bairro_info.loc[i][2], bairro_info.loc[i][3],
+                    dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
+        dadosConfirmado.append([bairro_info.loc[i][2], bairro_info.loc[i][3], 
+                    dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]])
+    
+    dfIdhObito = pd.DataFrame(dadosObito, columns=["lat", "lon", "Obitos"])
+    dfIdhConfirmado = pd.DataFrame(dadosConfirmado, columns=["lat", "lon", "Casos positivos"])
+
+    st.pydeck_chart(pdk.Deck(
+        map_style='mapbox://styles/mapbox/light-v9',
+        initial_view_state=pdk.ViewState(
+            latitude=-3.7789976,
+            longitude=-38.5401627,
+            zoom=10.5,
+            pitch=0,
+        ),
+        layers=[
+            pdk.Layer(
+                'HeatmapLayer',
+                data=dfIdhObito,
+                get_position='[lon, lat]',
+                opacity=0.5,
+                aggregation=String('MEAN'),
+                get_weight="Obitos"
+            ),
+        ],
+    ))
+
+    
