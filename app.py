@@ -20,8 +20,8 @@ bairro_info = bairro_info.set_index('Bairros')
 
 vacinados = pd.read_csv('Base de dados/vacinados.csv', sep=';')
 vacinados = vacinados.drop(['Unnamed: 0'], axis=1)
-vacinados['data_vacinação'] = pd.to_datetime(vacinados['data_vacinação'])
-vacinados['data_vacinação'] = vacinados['data_vacinação'].dt.date
+vacinados['vacina_dataaplicacao'] = pd.to_datetime(vacinados['vacina_dataaplicacao'])
+vacinados['vacina_dataaplicacao'] = vacinados['vacina_dataaplicacao'].dt.date
 
 ########################################################################################################
 st.sidebar.title('Menu')
@@ -34,7 +34,7 @@ dataAnalise = pd.to_datetime(dataAnalise, errors = 'coerce')
 
 filtroDt = (data.dataCaso >= dataAnalise[0]) & (data.dataCaso <= dataAnalise[1])
 df1 = data[filtroDt]
-filtroDt = (vacinados.data_vacinação >= dataAnalise[0]) & (vacinados.data_vacinação <= dataAnalise[1])
+filtroDt = (vacinados.vacina_dataaplicacao >= dataAnalise[0]) & (vacinados.vacina_dataaplicacao <= dataAnalise[1])
 df3 = vacinados[filtroDt]
 
 if pagina_atual == 'Analise geral':
@@ -82,4 +82,5 @@ elif pagina_atual == 'Analise por IDH':
 elif pagina_atual == 'Vacinação':
     st.markdown('# Vacinação em Fortaleza')
     vacinas_dias(df3)
+    tipo_vac(df3)
     vacinacao_grupo(df3)

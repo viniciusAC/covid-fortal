@@ -150,11 +150,11 @@ def vacinas_dias(dfAtual):
     dose1 = []
     dose2 = []
     date_list = []
-    grouped = dfAtual.groupby(['data_vacinação'])
+    grouped = dfAtual.groupby(['vacina_dataaplicacao'])
     for name, group in grouped:
         date_list.append(name)
-        dose1.append(group[group.dose == 'DOSE 1'].shape[0])
-        dose2.append(group[group.dose == 'DOSE 2'].shape[0])
+        dose1.append(group[group.vacina_descricao_dose == '    1ª Dose'].shape[0])
+        dose2.append(group[group.vacina_descricao_dose == '    2ª Dose'].shape[0])
 
     GrafDiaInfo = {'data': date_list, 'Primeira dose': dose1, 'Segunda dose': dose2}
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
@@ -179,13 +179,13 @@ def vacinacao_grupo(dfAtual):
     grupo = []
     nGrupo1 = []
     nGrupo2 = []
-    for i in dfAtual.faseDeVcinacao.value_counts().index:
-        filtroGrupo = dfAtual.faseDeVcinacao == i
+    for i in dfAtual.faseDeVacinacao.value_counts().index:
+        filtroGrupo = dfAtual.faseDeVacinacao == i
         dfTemp = dfAtual[filtroGrupo]
 
         grupo.append(i)
-        nGrupo1.append(dfTemp[dfTemp.dose == 'DOSE 1'].shape[0])
-        nGrupo2.append(dfTemp[dfTemp.dose == 'DOSE 2'].shape[0])
+        nGrupo1.append(dfTemp[dfTemp.vacina_descricao_dose == '    1ª Dose'].shape[0])
+        nGrupo2.append(dfTemp[dfTemp.vacina_descricao_dose == '    2ª Dose'].shape[0])
     
     GrafGrupo = {'Grupos prioritarios': grupo, 'Primeira dose': nGrupo1, 'Segunda dose': nGrupo2}
     dfGrafGrupo = pd.DataFrame(GrafGrupo)
@@ -260,4 +260,20 @@ def mapa(dfAtual, bairro_info):
         ],
     ))
 
+
+def tipo_vac(dfAtual):
+    grupo = []
+    nVac = []
+    for i in dfAtual.vacina_nome.value_counts().index:
+        filtroGrupo = dfAtual.vacina_nome == i
+        dfTemp = dfAtual[filtroGrupo]
+
+        grupo.append(i)
+        nVac.append(dfTemp.shape[0])
     
+    GrafVac = {'Vacina': grupo, 'Doses aplicadas': nVac}
+    dfGrafVac = pd.DataFrame(GrafVac)
+    dfGrafVac = dfGrafVac.set_index('Vacina')
+
+    st.markdown('### Quantidade de cada vacina aplicada')
+    st.bar_chart(dfGrafVac, height= 500)
