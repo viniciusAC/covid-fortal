@@ -11,7 +11,6 @@ def delete_wrong_dates(df_atual):
     df_atual.idadeCaso = df_atual.idadeCaso.replace(range(101,1001), float("nan"))
     df_atual.loc[df_atual['idadeCaso'] == float("nan"), 'faixaEtaria'] = 'Sem Informacao'
     df_atual.faixaEtaria = df_atual.faixaEtaria.fillna('Sem Informacao')
-    df_atual = df_atual.drop(columns=['idadeCaso'])
     dates = ['dataResultadoExame', 'dataInicioSintomas', 'dataColetaExame']
     optimize2(df_atual, dates)
     return df_atual
@@ -29,7 +28,7 @@ def remove_columns(df_atual):
                                 'comorbidadeImunodeficienciaSivep','comorbidadeRenalSivep', 
                                 'comorbidadeObesidadeSivep', 'cboEsus', 'gestante', 'classificacaoEstadoEsus', 
                                 'classificacaoFinalEsus', 'tipoTesteEsus', 'tipoLocalObito', 'classificacaoObito',
-                                'evolucaoCasoEsus', 'profissionalSaudeEsus', 'evolucaoCasoSivep', 'tipoTesteExame',
+                                'evolucaoCasoEsus', 'evolucaoCasoSivep', 'tipoTesteExame',
                                 'comorbidadeCardiovascularSivep',  'comorbidadeAsmaSivep', 'comorbidadeDiabetesSivep', 
                                 'comorbidadePneumopatiaSivep', 'classificacaoEstadoSivep', 'dataNotificacao', 'dataSolicitacaoExame',
                                 'dataInternacaoSivep', 'dataEntradaUTISivep', 'dataSaidaUTISivep', 'dataEvolucaoCasoSivep',

@@ -25,7 +25,7 @@ vacinados['vacina_dataaplicacao'] = vacinados['vacina_dataaplicacao'].dt.date
 
 ########################################################################################################
 st.sidebar.title('Menu')
-pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise por bairro', 'Analise por IDH', 'Vacinação'])
+pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise segmentada', 'Analise por bairro', 'Analise por IDH', 'Vacinação'])
 
 dataAnalise = [datetime.datetime(2020, 1, 1), datetime.date.today()]
 dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), datetime.date.today())
@@ -84,3 +84,32 @@ elif pagina_atual == 'Vacinação':
     vacinas_dias(df3)
     tipo_vac(df3)
     vacinacao_grupo(df3)
+
+elif pagina_atual == 'Analise segmentada':
+    st.markdown('# Analise segmentada')
+    seg_atual = st.selectbox('Selecione o segmento de analise', ['Idade', 'Profissional da saude'])
+
+    if seg_atual == 'Idade':
+        st.markdown('# Analise por idade')
+        values = st.slider('Selecione o intervalo de idade', 0, 130, (0, 130))
+
+        filtroIdadeMin = df1['idadeCaso'] >= values[0]
+        df_idade = df1[filtroIdadeMin]
+        filtroIdadeMax = df_idade['idadeCaso'] <= values[1]
+        df_idade = df_idade[filtroIdadeMax]
+
+        info_basicas(df_idade)
+        grafico_temporal(df_idade)
+        graficos_idade(df_idade)
+        mapa(df_idade, bairro_info)
+
+    elif seg_atual == 'Profissional da saude':
+        st.markdown('# Analise de profissionais da saude')
+
+        filtroSaude = df1['profissionalSaudeEsus'] == True
+        df_PSaude = df1[filtroSaude]
+
+        info_basicas(df_PSaude)
+        grafico_temporal(df_PSaude)
+        graficos_idade(df_PSaude)
+        mapa(df_PSaude, bairro_info)

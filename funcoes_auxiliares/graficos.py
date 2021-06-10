@@ -228,14 +228,14 @@ def mapa(dfAtual, bairro_info):
     dadosObito = []
     dadosConfirmado = []
     for i in dfAtual.bairroCaso.value_counts().index:
-        if i == 'Indeterminado':
+        if i == 'Indeterminado' or bairro_info.loc[i][1] == 0:
             continue
         filtroBairro = dfAtual.bairroCaso == i
         dfTemp = dfAtual[filtroBairro]
         dadosObito.append([bairro_info.loc[i][2], bairro_info.loc[i][3],
-                    dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
+                    (dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]/bairro_info.loc[i][1])*100])
         dadosConfirmado.append([bairro_info.loc[i][2], bairro_info.loc[i][3], 
-                    dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]])
+                    (dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]/bairro_info.loc[i][1])*100])
     
     dfIdhObito = pd.DataFrame(dadosObito, columns=["lat", "lon", "Obitos"])
     dfIdhConfirmado = pd.DataFrame(dadosConfirmado, columns=["lat", "lon", "Casos positivos"])

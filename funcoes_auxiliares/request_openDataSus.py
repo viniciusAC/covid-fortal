@@ -131,7 +131,7 @@ def request_vacinados():
     optimize2(data, ['vacina_dataaplicacao'])
     data = pre_proces_vac(data)
     data.drop_duplicates(keep=False,inplace=True,ignore_index=True)
-    data = edit_dates(dfAtual)
+    data = edit_dates(data)
     data = fase_vac(data)
     data.to_csv('Base de dados/vacinados.csv', sep=';')
     print('######################################################################################################')
