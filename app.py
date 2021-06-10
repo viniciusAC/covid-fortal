@@ -6,7 +6,7 @@ import datetime
 from funcoes_auxiliares.graficos import *
 
 data = pd.read_csv('Base de dados/dados_limpos.csv', sep=';')
-data = data.drop(['Unnamed: 0'], axis=1)
+# data = data.drop(['Unnamed: 0'], axis=1)
 data['dataCaso'] = pd.to_datetime(data['dataCaso'])
 data['dataCaso'] = data['dataCaso'].dt.date
 
