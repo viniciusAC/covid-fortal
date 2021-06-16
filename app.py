@@ -41,8 +41,8 @@ if pagina_atual == 'Analise geral':
     st.markdown('# Analise geral')
     info_basicas(df1)
     grafico_temporal(df1)
+    conjunto_mapa(df1, bairro_info)
     graficos_idade(df1)
-    mapa(df1, bairro_info)
     
 elif pagina_atual == 'Analise por bairro':
     st.markdown('# Analise por bairro')
@@ -59,6 +59,7 @@ elif pagina_atual == 'Analise por bairro':
     info_basicas(df_bairros)
     grafico_temporal(df_bairros)
     bairro_table(df_bairros)
+    conjunto_mapa(df_bairros, bairro_info)
     graficos_idade(df_bairros)
 
 elif pagina_atual == 'Analise por IDH':
@@ -77,6 +78,7 @@ elif pagina_atual == 'Analise por IDH':
     grafico_temporal(df_bairrosIdh)
     bairro_idh_table(df_bairrosIdh, bairro_info)
     idhXgraph(df_bairrosIdh, bairro_info)
+    conjunto_mapa(df_bairrosIdh, bairro_info)
     graficos_idade(df_bairrosIdh)
 
 elif pagina_atual == 'Vacinação':
@@ -91,7 +93,7 @@ elif pagina_atual == 'Analise segmentada':
 
     if seg_atual == 'Idade':
         st.markdown('# Analise por idade')
-        values = st.slider('Selecione o intervalo de idade', 0, 130, (0, 130))
+        values = st.slider('Selecione o intervalo de idade', 0, 110, (0, 110))
 
         filtroIdadeMin = df1['idadeCaso'] >= values[0]
         df_idade = df1[filtroIdadeMin]
@@ -100,8 +102,8 @@ elif pagina_atual == 'Analise segmentada':
 
         info_basicas(df_idade)
         grafico_temporal(df_idade)
+        conjunto_mapa(df_idade, bairro_info)
         graficos_idade(df_idade)
-        mapa(df_idade, bairro_info)
 
     elif seg_atual == 'Profissional da saude':
         st.markdown('# Analise de profissionais da saude')
@@ -111,5 +113,5 @@ elif pagina_atual == 'Analise segmentada':
 
         info_basicas(df_PSaude)
         grafico_temporal(df_PSaude)
+        conjunto_mapa(df_PSaude, bairro_info)
         graficos_idade(df_PSaude)
-        mapa(df_PSaude, bairro_info)

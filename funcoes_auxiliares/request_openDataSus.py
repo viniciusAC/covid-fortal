@@ -30,6 +30,13 @@ def edit_dates(dfAtual):
     dfAtual['vacina_dataaplicacao'] = dfAtual['vacina_dataaplicacao'].dt.date
     return dfAtual
 
+def corrigir_nome_vacina(dfAtual):
+    dfAtual.vacina_nome.replace('Covid-19-Coronavac-Sinovac/Butantan', 'Coronavac', inplace=True)
+    dfAtual.vacina_nome.replace('Vacina Covid-19 - Covishield', 'AstraZeneca', inplace=True)
+    dfAtual.vacina_nome.replace('Vacina covid-19 - BNT162b2 - BioNTech/Fosun Pharma/Pfizer', 'Pfizer', inplace=True)
+    dfAtual.vacina_nome.replace('Covid-19-AstraZeneca', 'AstraZeneca', inplace=True)
+    return dfAtual
+
 def fase_vac(dfAtual):
     dicFase = {'Outros': 'Outros',
                 'Outros Grupos': 'Outros',
@@ -132,6 +139,7 @@ def request_vacinados():
     data = pre_proces_vac(data)
     data.drop_duplicates(keep=False,inplace=True,ignore_index=True)
     data = edit_dates(data)
+    data = corrigir_nome_vacina(data)
     data = fase_vac(data)
     data.to_csv('Base de dados/vacinados.csv', sep=';')
     print('######################################################################################################')

@@ -5,6 +5,9 @@ import datetime
 import pydeck as pdk
 from pydeck.types import String
 
+import json
+from urllib.request import urlopen
+import plotly.express as px
 
 def grafico_temporal(dfAtual):
     infectadosPorDia = []
@@ -121,19 +124,7 @@ def idhXgraph(dfAtual, bairro_info):
         dadosConfirmado.append([bairro_info.loc[i][0], 
                     dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]])
     
-    dfIdhObito = pd.DataFrame(dadosObito, columns=["IDH", "Obitos"])
-
-    st.markdown('### IDH X Obitos')
-    st.vega_lite_chart(dfIdhObito, {
-        "height": 300,
-        'mark': {'type': 'circle', 'tooltip': True},
-        'encoding': {
-            'x': {'field': 'IDH', 'type': 'quantitative'},
-            'y': {'field': 'obitos', 'type': 'quantitative'}
-        },
-    }, use_container_width = True)
-
-    dfIdhConfirmado = pd.DataFrame(dados, columns=["IDH", "Casos positivos"])
+    dfIdhConfirmado = pd.DataFrame(dadosConfirmado, columns=["IDH", "Casos positivos"])
 
     st.markdown('### IDH X Casos positivos')
     st.vega_lite_chart(dfIdhConfirmado, {
@@ -142,6 +133,18 @@ def idhXgraph(dfAtual, bairro_info):
         'encoding': {
             'x': {'field': 'IDH', 'type': 'quantitative'},
             'y': {'field': 'Casos positivos', 'type': 'quantitative'}
+        },
+    }, use_container_width = True)
+
+    dfIdhObito = pd.DataFrame(dadosObito, columns=["IDH", "Obitos"])
+
+    st.markdown('### IDH X Obitos')
+    st.vega_lite_chart(dfIdhObito, {
+        "height": 300,
+        'mark': {'type': 'circle', 'tooltip': True},
+        'encoding': {
+            'x': {'field': 'IDH', 'type': 'quantitative'},
+            'y': {'field': 'Obitos', 'type': 'quantitative'}
         },
     }, use_container_width = True)
 
@@ -224,42 +227,6 @@ def vacinacao_grupo(dfAtual):
 
     st.table(tabFases)
 
-def mapa(dfAtual, bairro_info):
-    dadosObito = []
-    dadosConfirmado = []
-    for i in dfAtual.bairroCaso.value_counts().index:
-        if i == 'Indeterminado' or bairro_info.loc[i][1] == 0:
-            continue
-        filtroBairro = dfAtual.bairroCaso == i
-        dfTemp = dfAtual[filtroBairro]
-        dadosObito.append([bairro_info.loc[i][2], bairro_info.loc[i][3],
-                    (dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]/bairro_info.loc[i][1])*100])
-        dadosConfirmado.append([bairro_info.loc[i][2], bairro_info.loc[i][3], 
-                    (dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]/bairro_info.loc[i][1])*100])
-    
-    dfIdhObito = pd.DataFrame(dadosObito, columns=["lat", "lon", "Obitos"])
-    dfIdhConfirmado = pd.DataFrame(dadosConfirmado, columns=["lat", "lon", "Casos positivos"])
-
-    st.pydeck_chart(pdk.Deck(
-        map_style='mapbox://styles/mapbox/light-v9',
-        initial_view_state=pdk.ViewState(
-            latitude=-3.7789976,
-            longitude=-38.5401627,
-            zoom=10.5,
-            pitch=0,
-        ),
-        layers=[
-            pdk.Layer(
-                'HeatmapLayer',
-                data=dfIdhObito,
-                get_position='[lon, lat]',
-                opacity=0.5,
-                aggregation=String('MEAN'),
-                get_weight="Obitos"
-            ),
-        ],
-    ))
-
 
 def tipo_vac(dfAtual):
     grupo = []
@@ -267,9 +234,10 @@ def tipo_vac(dfAtual):
     for i in dfAtual.vacina_nome.value_counts().index:
         filtroGrupo = dfAtual.vacina_nome == i
         dfTemp = dfAtual[filtroGrupo]
-
         grupo.append(i)
         nVac.append(dfTemp.shape[0])
+
+    st.text(dfAtual.vacina_nome.value_counts())
     
     GrafVac = {'Vacina': grupo, 'Doses aplicadas': nVac}
     dfGrafVac = pd.DataFrame(GrafVac)
@@ -277,3 +245,62 @@ def tipo_vac(dfAtual):
 
     st.markdown('### Quantidade de cada vacina aplicada')
     st.bar_chart(dfGrafVac, height= 500)
+
+
+def mapa(counties, dfAtual, coluna):
+    fig = px.choropleth_mapbox(dfAtual, geojson=counties, locations='Bairros', color=coluna,
+                                color_continuous_scale=[(0, "white"), (0.5, "yellow"), (1, "red")],
+                                range_color=(0, dfAtual[f'{coluna}'].max()),
+                                mapbox_style="carto-positron",
+                                zoom=10.5, center = {"lat": -3.7789976, "lon": -38.5401627},
+                                opacity=0.8
+                                )
+    
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    st.plotly_chart(fig)
+
+def conjunto_mapa(dfAtual, bairro_info):
+    f = open('Base de dados/FortalezaBairros.geojson',)
+    counties = json.load(f)
+
+    for x in counties['features']:
+        x['id'] = x['properties']['NOME']
+        if x['id'] == 'ALTO DA BALANCA':
+            x['id'] = 'ALTO DA BALANÇA'
+        elif x['id'] == 'COACU':
+            x['id'] = 'COAÇU'
+        elif x['id'] == 'CONJUNTO ESPERANCA':
+            x['id'] = 'CONJUNTO ESPERANÇA'
+
+    dadosObito = []
+    dadosObitoPercent = []
+    dadosConfirmado = []
+    dadosConfirmadoPercent = []
+    for i in dfAtual.bairroCaso.value_counts().index:
+        if i == 'Indeterminado':
+            continue
+        filtroBairro = dfAtual.bairroCaso == i
+        dfTemp = dfAtual[filtroBairro]
+        dadosObito.append([i, dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]])
+        dadosObitoPercent.append([i, 100 * dfTemp[dfTemp.obitoConfirmado == 'Verdadeiro'].shape[0]/bairro_info.loc[i][1]])
+        dadosConfirmado.append([i, dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]])
+        dadosConfirmadoPercent.append([i, 100 * dfTemp[dfTemp.resultadoFinalExame == 'Positivo'].shape[0]/bairro_info.loc[i][1]])
+
+    st.markdown('### Mapa com informações dos bairros')
+    tipoMapa = st.selectbox('Selecione a informação', ['Total de casos confirmados', 
+                                                                'Total de obitos', 
+                                                                '% Caso confirmado por População', 
+                                                                '% Obitos por População'])
+
+    if tipoMapa == 'Total de casos confirmados':
+        dfConfirmado = pd.DataFrame(dadosConfirmado, columns=["Bairros", "Casos positivos"])
+        mapa(counties, dfConfirmado, "Casos positivos")
+    elif tipoMapa == 'Total de obitos':
+        dfObito = pd.DataFrame(dadosObito, columns=["Bairros", "Obitos"])
+        mapa(counties, dfObito, "Obitos")
+    elif tipoMapa == '% Caso confirmado por População':
+        dfConfirmadoCent = pd.DataFrame(dadosConfirmadoPercent, columns=["Bairros", "% Caso confirmado por População"])
+        mapa(counties, dfConfirmadoCent, "% Caso confirmado por População")
+    elif tipoMapa == '% Obitos por População':
+        dfObitoCent = pd.DataFrame(dadosObitoPercent, columns=["Bairros", "% Obitos por População"])
+        mapa(counties, dfObitoCent, "% Obitos por População")
