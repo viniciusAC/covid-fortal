@@ -27,9 +27,9 @@ vacinados['vacina_dataaplicacao'] = vacinados['vacina_dataaplicacao'].dt.date
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise segmentada', 'Analise por bairro', 'Analise por IDH', 'Vacinação'])
 
-dataAnalise = [datetime.datetime(2020, 1, 1), datetime.date.today()]
-dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), datetime.date.today())
-dataAnalise[1] = st.sidebar.date_input('Data de termino', dataAnalise[1], dataAnalise[0], datetime.date.today())
+dataAnalise = [datetime.datetime(2020, 1, 1), data['dataCaso'].max()]
+dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), data['dataCaso'].max())
+dataAnalise[1] = st.sidebar.date_input('Data de termino', dataAnalise[1], dataAnalise[0], data['dataCaso'].max())
 dataAnalise = pd.to_datetime(dataAnalise, errors = 'coerce')
 
 filtroDt = (data.dataCaso >= dataAnalise[0]) & (data.dataCaso <= dataAnalise[1])
@@ -89,7 +89,7 @@ elif pagina_atual == 'Vacinação':
 
 elif pagina_atual == 'Analise segmentada':
     st.markdown('# Analise segmentada')
-    seg_atual = st.selectbox('Selecione o segmento de analise', ['Idade', 'Profissional da saude'])
+    seg_atual = st.selectbox('Selecione o segmento de analise', ['Idade', 'Profissional da saude', 'Profissão'])
 
     if seg_atual == 'Idade':
         st.markdown('# Analise por idade')
@@ -115,3 +115,18 @@ elif pagina_atual == 'Analise segmentada':
         grafico_temporal(df_PSaude)
         conjunto_mapa(df_PSaude, bairro_info)
         graficos_idade(df_PSaude)
+
+    elif seg_atual == 'Profissão':
+        listpProf = df1.cboEsus.value_counts().index.to_list()
+        values = st.multiselect('Selecione as profissões', listpProf)    
+
+        if len(values) < 1:
+            values = listpProf
+
+        filProf = df1.cboEsus.isin(values)
+        df_profissao = df1[filProf]
+
+        info_basicas(df_profissao)
+        grafico_temporal(df_profissao)
+        conjunto_mapa(df_profissao, bairro_info)
+        graficos_idade(df_profissao)

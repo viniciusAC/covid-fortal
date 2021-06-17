@@ -26,7 +26,7 @@ def remove_columns(df_atual):
                                 'comorbidadeHematologiaSivep', 'comorbidadeSindromeDownSivep',
                                 'comorbidadeHepaticaSivep', 'comorbidadeNeurologiaSivep',
                                 'comorbidadeImunodeficienciaSivep','comorbidadeRenalSivep', 
-                                'comorbidadeObesidadeSivep', 'cboEsus', 'gestante', 'classificacaoEstadoEsus', 
+                                'comorbidadeObesidadeSivep', 'gestante', 'classificacaoEstadoEsus', 
                                 'classificacaoFinalEsus', 'tipoTesteEsus', 'tipoLocalObito', 'classificacaoObito',
                                 'evolucaoCasoEsus', 'evolucaoCasoSivep', 'tipoTesteExame',
                                 'comorbidadeCardiovascularSivep',  'comorbidadeAsmaSivep', 'comorbidadeDiabetesSivep', 
@@ -35,6 +35,14 @@ def remove_columns(df_atual):
                                 'dataNotificacaoObito', 'classificacaoFinalCasoSivep'])
     return df_atual
 
+def correct_cboEsus(df_atual):
+    print("Corrigindo profissões")
+    for i in df_atual.cboEsus.value_counts().index.to_list():
+        correcao = i.split('-')[1]
+        if correcao[0] == ' ':
+            correcao = correcao[1:]
+        df_atual.cboEsus.replace(i, correcao, inplace=True)
+    return df_atual
 
 def filter_muni(df_atual):
     print('Filtrando dados para Fortaleza')
@@ -202,6 +210,7 @@ def calculate_infection(df_atual, bairro_info):
 def processing_new_rows(df_atual):
     df_atual = remove_columns(df_atual)
     df_atual = delete_wrong_dates(df_atual)
+    df_atual = correct_cboEsus(df_atual)
     df_atual = filter_muni(df_atual)
     df_atual = date_correction(df_atual)
     df_atual = wrong_values(df_atual)
