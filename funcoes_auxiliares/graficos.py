@@ -236,8 +236,6 @@ def tipo_vac(dfAtual):
         dfTemp = dfAtual[filtroGrupo]
         grupo.append(i)
         nVac.append(dfTemp.shape[0])
-
-    st.text(dfAtual.vacina_nome.value_counts())
     
     GrafVac = {'Vacina': grupo, 'Doses aplicadas': nVac}
     dfGrafVac = pd.DataFrame(GrafVac)
