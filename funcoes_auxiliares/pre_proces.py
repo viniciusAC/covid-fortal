@@ -162,50 +162,68 @@ def correction_bairro(df_atual, bairro_info):
     return df_atual
 
 
-def calculate_infection(df_atual, bairro_info):
-    print('Calculando metricas dos bairros')
-    filtro = (df_atual.anoDeContagio == '2020')
-    df2020 = df_atual[filtro]
-    filtro2 = ((df2020.resultadoFinalExame == 'Positivo') | (df2020.resultadoFinalExame == 'Suspeito'))
-    df2020 = df2020[filtro2]
+def prof_group(df_atual):
+    print('Criando grupos')
+    dicGrupo = {'Técnicos e auxiliares de enfermagem' : 'Profissional da saude',
+            'Enfermeiros e afins' : 'Profissional da saude',
+            'Médico' : 'Profissional da saude',
+            'Agente Comunitário de Saúde' : 'Profissional da saude',
+            'Farmacêuticos' : 'Profissional da saude',
+            'Fisioterapeutas' : 'Profissional da saude',
+            'Cirurgião' : 'Profissional da saude',
+            'Psicólogos e psicanalistas' : 'Profissional da saude',
+            'Cuidador em Saúde' : 'Profissional da saude',
+            'Médicos clínicos' : 'Profissional da saude',
+            'Nutricionistas' : 'Profissional da saude',
+            'Policiais' : 'Policial/Exercito/Bombeiros',
+            'Outro tipo de agente de saúde ou visitador sanitário' : 'Profissional da saude',
+            'Agente de Saúde Pública' : 'Profissional da saude',
+            'Profissionais da educação física' : 'Profissionais da Educação',
+            'Vigilantes e guardas de segurança' : 'Policial/Exercito/Bombeiros',
+            'Médicos em medicina diagnóstica e terapêutica' : 'Profissional da saude',
+            'Terapeutas ocupacionais' : 'Profissional da saude',
+            'Condutor de Ambulância' : 'Profissional da saude',
+            'Cabos e soldados da polícia militar' : 'Policial/Exercito/Bombeiros',
+            'Oficiais generais das forças armadas' : 'Policial/Exercito/Bombeiros',
+            'Técnicos de odontologia' : 'Profissional da saude',
+            'Professor de Educação Infantil ou Ensino Fundamental' : 'Profissionais da Educação',
+            'Socorrista não médico e não enfermeiro' : 'Profissional da saude',
+            'Técnico em farmácia e em manipulação farmacêutica' : 'Profissional da saude',
+            'Biomédico' : 'Profissional da saude',
+            'Professor do Ensino Médio' : 'Profissionais da Educação',
+            'Subtenentes e sargentos da policia militar' : 'Policial/Exercito/Bombeiros',
+            'Profissional da Biotecnologia' : 'Profissional da saude',
+            'Outros profissionais de ensino' : 'Profissionais da Educação',
+            'Professor de Ensino Superior' : 'Profissionais da Educação',
+            'Oficiais superiores da polícia militar' : 'Policial/Exercito/Bombeiros',
+            'Delegados de polícia' : 'Policial/Exercito/Bombeiros',
+            'Bombeiros' : 'Policial/Exercito/Bombeiros',
+            'Tenentes da polícia militar' : 'Policial/Exercito/Bombeiros',
+            'Médicos em especialidades cirúrgicas' : 'Profissional da saude',
+            'Professores de nível superior na educação infantil' : 'Profissionais da Educação',
+            'Professores de nível médio na educação infantil' : 'Profissionais da Educação',
+            'Diretores e gerentes de instituição de serviços educacionais' : 'Profissionais da Educação',
+            'Cabos e soldados do corpo de bombeiros militar' : 'Policial/Exercito/Bombeiros',
+            'Professores do ensino médio' : 'Profissionais da Educação',
+            'Professores de nível superior do ensino fundamental (primeira a quarta séries)' : 'Profissionais da Educação',
+            'Professores na área de formação pedagógica do ensino superior' : 'Profissionais da Educação',
+            'Professores de nível médio no ensino fundamental' : 'Profissionais da Educação',
+            'Professor de Ensino Profissionalizante' : 'Profissionais da Educação',
+            'Professores de educação especial' : 'Profissionais da Educação',
+            'Professores leigos no ensino fundamental' : 'Profissionais da Educação',
+            'Instrutores e professores de cursos livres' : 'Profissionais da Educação',
+            'Oficiais superiores do corpo de bombeiros militar' : 'Policial/Exercito/Bombeiros',
+            'Professores de nível superior no ensino fundamental de quinta a oitava série' : 'Profissionais da Educação',
+            'Professores de artes do ensino superior' : 'Profissionais da Educação',
+            'Professores do ensino profissional' : 'Profissionais da Educação',
+            'Tenentes do corpo de bombeiros militar' : 'Policial/Exercito/Bombeiros'}
 
-    filtro = (df_atual.anoDeContagio == '2021')
-    df2021 = df_atual[filtro]
-    filtro2 = ((df2021.resultadoFinalExame == 'Positivo') | (df2021.resultadoFinalExame == 'Suspeito'))
-    df2021 = df2021[filtro2]
+    for i in range(len(list(dicGrupo))):
+        df_atual.loc[df_atual.cboEsus == list(dicGrupo)[i], 'profissoes'] = dicGrupo[list(dicGrupo)[i]]
 
-    filtro2 = ((df_atual.resultadoFinalExame == 'Positivo') | (df_atual.resultadoFinalExame == 'Suspeito'))
-    df_limpa = df_atual[filtro2]
+    df_atual.drop(columns=['cboEsus'], inplace=True)
+    return df_atual
 
-    razao2020 = {}
-    razao2021 = {}
-    count = 0
-
-    bairroValues2020 = df2020.bairroCaso.value_counts()
-    bairroValues2021 = df2021.bairroCaso.value_counts()
-
-    for i in bairro_info.index.to_list():
-        if bairro_info.loc[i]['populaçao em 2010[8]'] != 0:
-            razao2020[i] = bairroValues2020[i] / bairro_info.loc[i]['populaçao em 2010[8]']
-            razao2021[i] = bairroValues2021[i] / bairro_info.loc[i]['populaçao em 2010[8]']
-
-    razao = {}
-    for i in razao2020.keys():
-        razao[i] = razao2020[i] + razao2021[i]
-
-    razao2020 = sorted(razao2020.items(), key=lambda kv: kv[0])
-    razao2021 = sorted(razao2021.items(), key=lambda kv: kv[0])
-    razao = sorted(razao.items(), key=lambda kv: kv[1])
-
-    razao2020 = pd.DataFrame(razao2020,columns=['Bairros', 'Razao_2020'])
-    razao2020 = razao2020.set_index('Bairros')
-    razao2021 = pd.DataFrame(razao2021,columns=['Bairros', 'Razao_2021'])
-    razao2021 = razao2021.set_index('Bairros')
-    razao = pd.DataFrame(razao,columns=['Bairros', 'Razao'])
-    razao = razao.set_index('Bairros')
-    bairro_info = pd.concat([bairro_info, razao2020, razao2021, razao], axis=1)
-
-    bairro_info.to_csv('Base de dados/dados_bairros+.csv', sep=',')
 
 def processing_new_rows(df_atual):
     df_atual = remove_columns(df_atual)
@@ -220,10 +238,11 @@ def processing_new_rows(df_atual):
     bairro_info = bairro_info.set_index('Bairros')
 
     df_atual = correction_bairro(df_atual, bairro_info)
+    df_atual = prof_group(df_atual)
 
-    df_atual.sort_values(by=['resultadoFinalExame'], inplace=True)  
-    df_atual.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True)
-    df_atual = df_atual.drop(columns=['identificadorCaso'])
+    # df_atual.sort_values(by=['resultadoFinalExame'], inplace=True)  
+    # df_atual.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True)
+    # df_atual = df_atual.drop(columns=['identificadorCaso'])
 
 
     df_atual.to_csv('Base de dados/dados_limpos.csv', sep=';')

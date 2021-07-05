@@ -4,13 +4,15 @@ import pandas as pd
 import datetime
 
 from funcoes_auxiliares.graficos import *
+from funcoes_auxiliares.VacGraphs import *
+from funcoes_auxiliares.Maps import *
 
 data = pd.read_csv('Base de dados/dados_limpos.csv', sep=';')
 data = data.drop(['Unnamed: 0'], axis=1)
 data['dataCaso'] = pd.to_datetime(data['dataCaso'])
-data['dataCaso'] = data['dataCaso'].dt.date
+# data['dataCaso'] = data['dataCaso'].dt.date
 
-# data.sort_values(by=['resultadoFinalExame'], inplace=True)  
+data.sort_values(by=['identificadorCaso', 'resultadoFinalExame'], inplace=True)  
 # data.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True)
 # data = data.drop(columns=['identificadorCaso'])
 
@@ -25,7 +27,9 @@ vacinados['vacina_dataaplicacao'] = vacinados['vacina_dataaplicacao'].dt.date
 
 ########################################################################################################
 st.sidebar.title('Menu')
-pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise segmentada', 'Analise por bairro', 'Analise por IDH', 'Vacinação'])
+pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise segmentada', 'Analise por bairro', 
+                                                                    'Analise por IDH', 'Vacinação geral', 'Vacinação por grupos', 
+                                                                    'Vacinação por idade'])
 
 dataAnalise = [datetime.datetime(2020, 1, 1), data['dataCaso'].max()]
 dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), data['dataCaso'].max())
@@ -41,8 +45,9 @@ if pagina_atual == 'Analise geral':
     st.markdown('# Analise geral')
     info_basicas(df1)
     grafico_temporal(df1)
-    conjunto_mapa(df1, bairro_info)
     graficos_idade(df1)
+    Idade_media(df1)
+    conjunto_mapa(df1, bairro_info)
     
 elif pagina_atual == 'Analise por bairro':
     st.markdown('# Analise por bairro')
@@ -59,8 +64,8 @@ elif pagina_atual == 'Analise por bairro':
     info_basicas(df_bairros)
     grafico_temporal(df_bairros)
     bairro_table(df_bairros)
-    conjunto_mapa(df_bairros, bairro_info)
     graficos_idade(df_bairros)
+    conjunto_mapa(df_bairros, bairro_info)
 
 elif pagina_atual == 'Analise por IDH':
     st.markdown('# Analise por IDH')
@@ -78,10 +83,10 @@ elif pagina_atual == 'Analise por IDH':
     grafico_temporal(df_bairrosIdh)
     bairro_idh_table(df_bairrosIdh, bairro_info)
     idhXgraph(df_bairrosIdh, bairro_info)
-    conjunto_mapa(df_bairrosIdh, bairro_info)
     graficos_idade(df_bairrosIdh)
+    conjunto_mapa(df_bairrosIdh, bairro_info)
 
-elif pagina_atual == 'Vacinação':
+elif pagina_atual == 'Vacinação geral':
     st.markdown('# Vacinação em Fortaleza')
     vacinas_dias(df3)
     tipo_vac(df3)
@@ -102,8 +107,8 @@ elif pagina_atual == 'Analise segmentada':
 
         info_basicas(df_idade)
         grafico_temporal(df_idade)
-        conjunto_mapa(df_idade, bairro_info)
         graficos_idade(df_idade)
+        conjunto_mapa(df_idade, bairro_info)
 
     elif seg_atual == 'Profissional da saude':
         st.markdown('# Analise de profissionais da saude')
@@ -113,20 +118,47 @@ elif pagina_atual == 'Analise segmentada':
 
         info_basicas(df_PSaude)
         grafico_temporal(df_PSaude)
-        conjunto_mapa(df_PSaude, bairro_info)
         graficos_idade(df_PSaude)
+        conjunto_mapa(df_PSaude, bairro_info)
 
     elif seg_atual == 'Profissão':
-        listpProf = df1.cboEsus.value_counts().index.to_list()
+        listpProf = df1.profissoes.value_counts().index.to_list()
         values = st.multiselect('Selecione as profissões', listpProf)    
 
         if len(values) < 1:
             values = listpProf
 
-        filProf = df1.cboEsus.isin(values)
+        filProf = df1.profissoes.isin(values)
         df_profissao = df1[filProf]
 
         info_basicas(df_profissao)
         grafico_temporal(df_profissao)
-        conjunto_mapa(df_profissao, bairro_info)
         graficos_idade(df_profissao)
+        conjunto_mapa(df_profissao, bairro_info)
+
+elif pagina_atual == 'Vacinação por grupos':
+    listGrupo = df3.grupoVacinacao.value_counts().index.to_list()
+    values = st.multiselect('Selecione o grupo', listGrupo)    
+
+    if len(values) < 1:
+        values = listGrupo
+
+    filGrupo = df3.grupoVacinacao.isin(values)
+    df_grupo_vacinacao = df3[filGrupo]
+
+    vacinas_dias(df_grupo_vacinacao)
+    tipo_vac(df_grupo_vacinacao)
+    vacinacao_grupo(df_grupo_vacinacao)
+
+elif pagina_atual == 'Vacinação por idade':
+    st.markdown('# Analise por idade')
+    values = st.slider('Selecione o intervalo de idade', 0, 110, (0, 110))
+
+    filtroIdadeMin = df3['paciente_idade'] >= values[0]
+    df_idade = df3[filtroIdadeMin]
+    filtroIdadeMax = df_idade['paciente_idade'] <= values[1]
+    df_idade = df_idade[filtroIdadeMax]
+
+    vacinas_dias(df_idade)
+    tipo_vac(df_idade)
+    vacinacao_grupo(df_idade)
