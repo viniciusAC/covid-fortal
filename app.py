@@ -5,6 +5,7 @@ import datetime
 from funcoes_auxiliares.graficos import *
 from funcoes_auxiliares.VacGraphs import *
 from funcoes_auxiliares.Maps import *
+from funcoes_auxiliares.mobility_graphs import *
 
 data = pd.read_csv('Base_de_dados/dados_limpos.csv', sep=';')
 data = data.drop(['Unnamed: 0'], axis=1)
@@ -24,11 +25,15 @@ vacinados = vacinados.drop(['Unnamed: 0'], axis=1)
 vacinados['vacina_dataaplicacao'] = pd.to_datetime(vacinados['vacina_dataaplicacao'])
 vacinados['vacina_dataaplicacao'] = vacinados['vacina_dataaplicacao'].dt.date
 
+mob = pd.read_csv('Base_de_dados/mobilidade.csv', sep=';')
+mob = mob.drop(['Unnamed: 0'], axis=1)
+mob['date'] = pd.to_datetime(mob['date'])
+
 ########################################################################################################
 st.sidebar.title('Menu')
 pagina_atual = st.sidebar.selectbox('Selecione o tipo de analise', ['Analise geral', 'Analise segmentada', 'Analise por bairro', 
                                                                     'Analise por IDH', 'Vacinação geral', 'Vacinação por grupos', 
-                                                                    'Vacinação por idade'])
+                                                                    'Vacinação por idade', 'Mobilidade'])
 
 dataAnalise = [datetime.datetime(2020, 1, 1), data['dataCaso'].max()]
 dataAnalise[0] = st.sidebar.date_input('Data de inicio', dataAnalise[0], datetime.datetime(2020, 1, 1), data['dataCaso'].max())
@@ -39,6 +44,8 @@ filtroDt = (data.dataCaso >= dataAnalise[0]) & (data.dataCaso <= dataAnalise[1])
 df1 = data[filtroDt]
 filtroDt = (vacinados.vacina_dataaplicacao >= dataAnalise[0]) & (vacinados.vacina_dataaplicacao <= dataAnalise[1])
 df3 = vacinados[filtroDt]
+filtroDt = (mob.date >= dataAnalise[0]) & (mob.date <= dataAnalise[1])
+df4 = mob[filtroDt]
 
 if pagina_atual == 'Analise geral':
     st.markdown('# Analise geral')
@@ -161,3 +168,8 @@ elif pagina_atual == 'Vacinação por idade':
     vacinas_dias(df_idade)
     tipo_vac(df_idade)
     vacinacao_grupo(df_idade)
+
+elif pagina_atual == 'Mobilidade':
+    st.markdown('# Analise de Mobilidade')
+
+    mob_graphs(df4)
