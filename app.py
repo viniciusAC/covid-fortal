@@ -1,5 +1,4 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 import datetime
 
@@ -7,7 +6,7 @@ from funcoes_auxiliares.graficos import *
 from funcoes_auxiliares.VacGraphs import *
 from funcoes_auxiliares.Maps import *
 
-data = pd.read_csv('Base de dados/dados_limpos.csv', sep=';')
+data = pd.read_csv('Base_de_dados/dados_limpos.csv', sep=';')
 data = data.drop(['Unnamed: 0'], axis=1)
 data['dataCaso'] = pd.to_datetime(data['dataCaso'])
 # data['dataCaso'] = data['dataCaso'].dt.date
@@ -16,11 +15,11 @@ data.sort_values(by=['identificadorCaso', 'resultadoFinalExame'], inplace=True)
 # data.drop_duplicates(subset='identificadorCaso', keep='last', inplace=True)
 # data = data.drop(columns=['identificadorCaso'])
 
-bairro_info = pd.read_csv(f'Base de dados/dados_bairros.csv', sep=',')
+bairro_info = pd.read_csv(f'Base_de_dados/dados_bairros.csv', sep=',')
 bairro_info.Bairros	= bairro_info.Bairros.str.upper()
 bairro_info = bairro_info.set_index('Bairros')
 
-vacinados = pd.read_csv('Base de dados/vacinados.csv', sep=';')
+vacinados = pd.read_csv('Base_de_dados/vacinados.csv', sep=';')
 vacinados = vacinados.drop(['Unnamed: 0'], axis=1)
 vacinados['vacina_dataaplicacao'] = pd.to_datetime(vacinados['vacina_dataaplicacao'])
 vacinados['vacina_dataaplicacao'] = vacinados['vacina_dataaplicacao'].dt.date

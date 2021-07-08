@@ -3,7 +3,7 @@ import pandas as pd
 import io
 
 from funcoes_auxiliares.otimizacao import *
-from funcoes_auxiliares.crawler import *
+from funcoes_auxiliares.crawler_openDataSus import *
 
 def del_col(dfAtual):
     colunas = ['paciente_id', 'paciente_idade', 'paciente_enumsexobiologico', 'paciente_racacor_valor', 'vacina_grupoatendimento_nome', 
@@ -200,5 +200,5 @@ def request_vacinados():
     data = corrigir_nome_vacina(data)
     data = fase_vac(data)
     data = grupo_vac(data)
-    data.to_csv('Base de dados/vacinados.csv', sep=';')
+    data.to_csv('Base_de_dados/vacinados.csv', sep=';')
     print('######################################################################################################')

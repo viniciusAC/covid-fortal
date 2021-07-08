@@ -14,21 +14,21 @@ def resquest_new_rows():
 
     print('extraindo dados')
     z = zipfile.ZipFile(io.BytesIO(r.content))
-    z.extractall('Base de dados/zip/')
+    z.extractall('Base_de_dados/zip/')
 
     files = []
-    for file in glob.glob('Base de dados/zip/casos_coronavirus_20*.csv'):
+    for file in glob.glob('Base_de_dados/zip/casos_coronavirus_20*.csv'):
         files.append(file[18:])
 
     print('Criando nova base')
-    base = pd.read_csv(f'Base de dados/zip/{files.pop()}', sep=';')
+    base = pd.read_csv(f'Base_de_dados/zip/{files.pop()}', sep=';')
     optimize2(base)
     for i in files:
-        partial = pd.read_csv(f'Base de dados/zip/{i}', sep=';')
+        partial = pd.read_csv(f'Base_de_dados/zip/{i}', sep=';')
         optimize2(partial)
         base = base.append(partial, ignore_index=True)
 
-    shutil.rmtree('Base de dados/zip/')
+    shutil.rmtree('Base_de_dados/zip/')
 
     return base
 

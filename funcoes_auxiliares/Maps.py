@@ -20,7 +20,7 @@ def mapa(counties, dfAtual, coluna):
     st.plotly_chart(fig)
 
 def conjunto_mapa(dfAtual, bairro_info):
-    f = open('Base de dados/FortalezaBairros.geojson',)
+    f = open('Base_de_dados/FortalezaBairros.geojson',)
     counties = json.load(f)
 
     for x in counties['features']:
