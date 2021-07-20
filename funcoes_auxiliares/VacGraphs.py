@@ -11,9 +11,9 @@ def vacinas_dias(dfAtual):
     grouped = dfAtual.groupby(['vacina_dataaplicacao'])
     for name, group in grouped:
         date_list.append(name)
-        dose1.append(group[group.vacina_descricao_dose == '    1ª Dose'].shape[0])
-        dose2.append(group[group.vacina_descricao_dose == '    2ª Dose'].shape[0])
-        doseUni.append(group[group.vacina_descricao_dose == '\xa0\xa0\xa0\xa0Dose\xa0'].shape[0])
+        dose1.append(group[group.vacina_descricao_dose == '1ª\xa0Dose'].shape[0])
+        dose2.append(group[group.vacina_descricao_dose == '2ª\xa0Dose'].shape[0])
+        doseUni.append(group[group.vacina_descricao_dose == 'Dose\xa0'].shape[0])
 
     GrafDiaInfo = {'data': date_list, 'Primeira dose': dose1, 'Segunda dose': dose2, 'Dose unica':doseUni }
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
@@ -48,9 +48,9 @@ def vacinacao_grupo(dfAtual):
         dfTemp = dfAtual[filtroGrupo]
 
         grupo.append(i)
-        nGrupo1.append(dfTemp[dfTemp.vacina_descricao_dose == '    1ª Dose'].shape[0])
-        nGrupo2.append(dfTemp[dfTemp.vacina_descricao_dose == '    2ª Dose'].shape[0])
-        nGrupoUni.append(dfTemp[dfTemp.vacina_descricao_dose == '\xa0\xa0\xa0\xa0Dose\xa0'].shape[0])
+        nGrupo1.append(dfTemp[dfTemp.vacina_descricao_dose == '1ª\xa0Dose'].shape[0])
+        nGrupo2.append(dfTemp[dfTemp.vacina_descricao_dose == '2ª\xa0Dose'].shape[0])
+        nGrupoUni.append(dfTemp[dfTemp.vacina_descricao_dose == 'Dose\xa0'].shape[0])
     
     GrafGrupo = {'Grupos prioritarios': grupo, 'Primeira dose': nGrupo1, 'Segunda dose': nGrupo2, 'Dose unica': nGrupoUni }
     dfGrafGrupo = pd.DataFrame(GrafGrupo)

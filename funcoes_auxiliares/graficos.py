@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 def grafico_temporal(dfAtual):
     infectadosPorDia = []
@@ -142,12 +143,16 @@ def idhXgraph(dfAtual, bairro_info):
 def Idade_media(dfAtual):
     filtroConfirmado = (dfAtual.resultadoFinalExame == 'Positivo')
     dfConfirmado = dfAtual[filtroConfirmado]
-    filtroObito = (dfConfirmado.obitoConfirmado == 'Verdadeiro')
-    dfObito = dfConfirmado[filtroObito]
+    filtroObito = (dfAtual.obitoConfirmado == 'Verdadeiro')
+    dfObito = dfAtual[filtroObito]
 
     grouped = dfConfirmado.groupby(['resultadoFinalExame', pd.Grouper(key='dataCaso', freq='W-MON')])['idadeCaso'].mean().reset_index().sort_values('dataCaso')
 
-    dfConfirmado = {'data': grouped.dataCaso.to_list(), 'Media da idade de casos confirmados': grouped.idadeCaso.to_list()}
+    quant = list(range(1, len(grouped.idadeCaso.to_list()) + 1 ))
+    idade = np.cumsum(grouped.idadeCaso.to_list())
+    med = [i/n for i, n in zip(idade, quant)]
+
+    dfConfirmado = {'data': grouped.dataCaso.to_list(), 'Media da idade de casos confirmados': med}
     dfConfirmado = pd.DataFrame(dfConfirmado)
     dfConfirmado = dfConfirmado.set_index('data')
 
@@ -156,10 +161,68 @@ def Idade_media(dfAtual):
 
     grouped = dfObito.groupby(['obitoConfirmado', pd.Grouper(key='dataCaso', freq='W-MON')])['idadeCaso'].mean().reset_index().sort_values('dataCaso')
 
-    dfObito = {'data': grouped.dataCaso.to_list(), 'Media da idade de obitos': grouped.idadeCaso.to_list()}
+    quant = list(range(1, len(grouped.idadeCaso.to_list()) + 1 ))
+    idade = np.cumsum(grouped.idadeCaso.to_list())
+    med = [i/n for i, n in zip(idade, quant)]
+
+    dfObito = {'data': grouped.dataCaso.to_list(), 'Media da idade de obitos': med}
     dfObito = pd.DataFrame(dfObito)
     dfObito = dfObito.set_index('data')
 
     st.markdown('### Media de idade de obitos')
     st.line_chart(dfObito)
+
+
+def temporal_por_idade(dfAtual):
+    filtroConfirmado = (dfAtual.resultadoFinalExame == 'Positivo')
+    dfConfirmado = dfAtual[filtroConfirmado]
+    dfConfirmado = dfConfirmado[['dataCaso', 'faixaEtaria', 'resultadoFinalExame', 'obitoConfirmado']]
+    filtroObito = (dfAtual.obitoConfirmado == 'Verdadeiro')
+    dfObito = dfAtual[filtroObito]
+    dfObito = dfObito[['dataCaso', 'faixaEtaria', 'obitoConfirmado']]
+
+    grouped = dfConfirmado.groupby(['faixaEtaria', pd.Grouper(key='dataCaso', freq='M')])['resultadoFinalExame'].count().reset_index().sort_values('dataCaso')
+
+    func = {}
+    faixa = {'80 ou mais' : '80 ou mais', '65 a 69 anos' : '60 a 69 anos', '55 a 59 anos' : '50 a 59 anos', '70 a 74 anos' : '70 a 79 anos', '75 a 79 anos' : '70 a 79 anos', '60 a 64 anos' : '60 a 69 anos', '50 a 54 anos' : '50 a 59 anos', '40 a 44 anos' : '40 a 49 anos', '45 a 49 anos' : '40 a 49 anos', '35 a 39 anos' : '30 a 39 anos', '30 a 34 anos' : '30 a 39 anos', '25 a 29 anos' : '20 a 29 anos', '20 a 24 anos' : '20 a 29 anos', '00 a 04 anos' : '00 a 09 anos', '15 a 19 anos' : '10 a 19 anos', '05 a 09 anos' : '00 a 09 anos', '10 a 14 anos' : '10 a 19 anos', 'Sem Informacao' : 'i'}
+    for i in list(faixa):
+        if faixa[i] == 'i':
+            continue
+        grouped[faixa[i]] = np.where(grouped['faixaEtaria'] == i, grouped['resultadoFinalExame'], 0)
+        func[faixa[i]] = 'sum'
+    grouped.drop(columns=['faixaEtaria', 'resultadoFinalExame'], inplace=True)
+
+    grouped = grouped.groupby(grouped['dataCaso']).aggregate(func)
+
+    st.markdown('### Casos confirmados por mês, segmentado por idade')
+    st.line_chart(grouped)
+
+    grouped2 = dfObito.groupby(['faixaEtaria', pd.Grouper(key='dataCaso', freq='M')])['obitoConfirmado'].count().reset_index().sort_values('dataCaso')
+
+    func2 = {}
+    faixa = {'80 ou mais' : '80 ou mais', '65 a 69 anos' : '60 a 69 anos', '55 a 59 anos' : '50 a 59 anos', '70 a 74 anos' : '70 a 79 anos', '75 a 79 anos' : '70 a 79 anos', '60 a 64 anos' : '60 a 69 anos', '50 a 54 anos' : '50 a 59 anos', '40 a 44 anos' : '40 a 49 anos', '45 a 49 anos' : '40 a 49 anos', '35 a 39 anos' : '30 a 39 anos', '30 a 34 anos' : '30 a 39 anos', '25 a 29 anos' : '20 a 29 anos', '20 a 24 anos' : '20 a 29 anos', '00 a 04 anos' : '00 a 09 anos', '15 a 19 anos' : '10 a 19 anos', '05 a 09 anos' : '00 a 09 anos', '10 a 14 anos' : '10 a 19 anos', 'Sem Informacao' : 'i'}
+    for i in list(faixa):
+        if faixa[i] == 'i':
+            continue
+        grouped2[faixa[i]] = np.where(grouped2['faixaEtaria'] == i, grouped2['obitoConfirmado'], 0)
+        func2[faixa[i]] = 'sum'
+    grouped2.drop(columns=['faixaEtaria', 'obitoConfirmado'], inplace=True)
+
+    grouped2 = grouped2.groupby(grouped2['dataCaso']).aggregate(func2)
+
+    st.markdown('### Obitos por mês, segmentado por idade')
+    st.line_chart(grouped2)
+
+    grouped2.rename(columns={'80 ou mais': '80 ou mais O', '60 a 69 anos' : '60 a 69 anos O', '50 a 59 anos' : '50 a 59 anos O', '70 a 79 anos' : '70 a 79 anos O', '40 a 49 anos' : '40 a 49 anos O', '30 a 39 anos' : '30 a 39 anos O', '20 a 29 anos' : '20 a 29 anos O', '00 a 09 anos' : '00 a 09 anos O', '10 a 19 anos' : '10 a 19 anos O'}, inplace=True)
+
+    result = pd.concat([grouped2, grouped], axis=1)
+    result.fillna(0, inplace=True)
+    for i in list(func):
+        result[i] = result[i+' O'] * 100 / result[i]
+        result.drop(columns=[i + ' O'], inplace=True)
+    result.fillna(0, inplace=True)
+    
+    st.markdown('### Letalidade por mês, segmentado por idade (em porcentagem)')
+    st.line_chart(result)
+
     
