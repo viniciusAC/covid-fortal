@@ -4,29 +4,34 @@ import pandas as pd
 
 
 def vacinas_dias(dfAtual):
-    dose1 = []
-    dose2 = []
-    doseUni = []
-    date_list = []
-    grouped = dfAtual.groupby(['vacina_dataaplicacao'])
-    for name, group in grouped:
-        date_list.append(name)
-        dose1.append(group[group.vacina_descricao_dose == '1ª\xa0Dose'].shape[0])
-        dose2.append(group[group.vacina_descricao_dose == '2ª\xa0Dose'].shape[0])
-        doseUni.append(group[group.vacina_descricao_dose == 'Dose\xa0'].shape[0])
+    filtroConfirmado = (dfAtual.vacina_descricao_dose == '1ª\xa0Dose')
+    df_dose1 = dfAtual[filtroConfirmado]
+    filtroObito = (dfAtual.vacina_descricao_dose == '2ª\xa0Dose')
+    df_dose2 = dfAtual[filtroObito]
+    filtroObito = (dfAtual.vacina_descricao_dose == 'Dose\xa0')
+    df_dose_unica = dfAtual[filtroObito]
 
-    GrafDiaInfo = {'data': date_list, 'Primeira dose': dose1, 'Segunda dose': dose2, 'Dose unica':doseUni }
-    dfGrafDia = pd.DataFrame(GrafDiaInfo)
-    dfGrafDia = dfGrafDia.set_index('data')
+    df_dose1 = df_dose1.groupby(['vacina_dataaplicacao'])['vacina_descricao_dose'].count().reset_index().sort_values('vacina_dataaplicacao')
+    df_dose1.rename(columns={'vacina_descricao_dose': 'Primeira dose'}, inplace=True)
+    df_dose1.set_index('vacina_dataaplicacao', inplace=True)
+    df_dose2 = df_dose2.groupby(['vacina_dataaplicacao'])['vacina_descricao_dose'].count().reset_index().sort_values('vacina_dataaplicacao')
+    df_dose2.rename(columns={'vacina_descricao_dose': 'Segunda dose'}, inplace=True)
+    df_dose2.set_index('vacina_dataaplicacao', inplace=True)
+    df_dose_unica = df_dose_unica.groupby(['vacina_dataaplicacao'])['vacina_descricao_dose'].count().reset_index().sort_values('vacina_dataaplicacao')
+    df_dose_unica.rename(columns={'vacina_descricao_dose': 'Dose unica'}, inplace=True)
+    df_dose_unica.set_index('vacina_dataaplicacao', inplace=True)
+
+    dfGrafDia = pd.concat([df_dose1, df_dose2, df_dose_unica], axis=1)
+    dfGrafDia.fillna(0, inplace=True)
 
     st.markdown('### Mostragem dos vacinados')
     st.bar_chart(dfGrafDia)
 
-    dose1 = np.cumsum(dose1)
-    dose2 = np.cumsum(dose2)
-    doseUni = np.cumsum(doseUni)
+    dose1 = np.cumsum(dfGrafDia['Primeira dose'].to_list())
+    dose2 = np.cumsum(dfGrafDia['Segunda dose'].to_list())
+    doseUni = np.cumsum(dfGrafDia['Dose unica'].to_list())
 
-    GrafDiaInfo = {'data': date_list, 'Primeira dose': dose1, 'Segunda dose': dose2, 'Dose unica':doseUni }
+    GrafDiaInfo = {'data': dfGrafDia.index.to_list(), 'Primeira dose': dose1, 'Segunda dose': dose2, 'Dose unica':doseUni }
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
     dfGrafDia = dfGrafDia.set_index('data')
 

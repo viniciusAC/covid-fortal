@@ -3,26 +3,25 @@ import pandas as pd
 import numpy as np
 
 def grafico_temporal(dfAtual):
-    infectadosPorDia = []
-    #suspeitosPorDia = []
-    obtosPorDia = []
-    date_list = []
-    grouped = dfAtual.groupby(['dataCaso'])
-    for name, group in grouped:
-        date_list.append(name)
-        infectadosPorDia.append(group[group.resultadoFinalExame == 'Positivo'].shape[0])
-        obtosPorDia.append(group[group.obitoConfirmado == 'Verdadeiro'].shape[0])
+    filtroConfirmado = (dfAtual.resultadoFinalExame == 'Positivo')
+    dfConfirmado = dfAtual[filtroConfirmado]
+    filtroObito = (dfAtual.obitoConfirmado == 'Verdadeiro')
+    dfObito = dfAtual[filtroObito]
 
-    GrafDiaInfo = {'data': date_list, 'casos confirmados': infectadosPorDia}
+    grouped = dfConfirmado.groupby(['dataCaso'])['resultadoFinalExame'].count().reset_index().sort_values('dataCaso')
+
+    GrafDiaInfo = {'data': grouped.dataCaso.to_list(), 'casos confirmados': grouped.resultadoFinalExame.to_list()}
     dfGrafDia = pd.DataFrame(GrafDiaInfo)
     dfGrafDia = dfGrafDia.set_index('data')
 
-    GrafObitosDiaInfo = {'data': date_list, 'obitos': obtosPorDia}
-    dfObitoGrafDia = pd.DataFrame(GrafObitosDiaInfo)
-    dfObitoGrafDia = dfObitoGrafDia.set_index('data')
-
     st.markdown('### Mostragem dos casos')
     st.bar_chart(dfGrafDia)
+
+    grouped = dfObito.groupby(['dataCaso'])['obitoConfirmado'].count().reset_index().sort_values('dataCaso')
+
+    GrafObitosDiaInfo = {'data': grouped.dataCaso.to_list(), 'obitos': grouped.obitoConfirmado.to_list()}
+    dfObitoGrafDia = pd.DataFrame(GrafObitosDiaInfo)
+    dfObitoGrafDia = dfObitoGrafDia.set_index('data')
 
     st.markdown('### Mostragem dos obitos')
     st.bar_chart(dfObitoGrafDia)
